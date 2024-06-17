@@ -1,0 +1,71 @@
+{
+  "name": "tech-interview-trainer-ts",
+  "version": "1.0.0",
+  "main": "dist/run.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc",
+    "dev": "tsc-watch --onSuccess \"node dist/run.js\"",
+    "start": "node dist/run.js"
+  },
+  "dependencies": {
+    "@grammyjs/conversations": "^1.2.0",
+    "@grammyjs/hydrate": "^1.4.1",
+    "@grammyjs/i18n": "^1.0.2",
+    "@grammyjs/menu": "^1.2.1",
+    "@grammyjs/parse-mode": "^1.10.0",
+    "@grammyjs/ratelimiter": "^1.2.0",
+    "@grammyjs/storage-redis": "^2.4.2",
+    "@grammyjs/transformer-throttler": "^1.2.1",
+    "@prisma/client": "^5.15.0",
+    "cron": "^3.1.7",
+    "dotenv": "^16.4.5",
+    "envalid": "^8.0.0",
+    "fastify": "^4.28.0",
+    "grammy": "^1.24.1",
+    "grammy-guard": "^0.5.0",
+    "ioredis": "^5.4.1",
+    "iso-639-1": "^3.1.2",
+    "lodash": "^4.17.21",
+    "module-alias": "^2.2.3",
+    "pino": "^9.2.0",
+    "pino-pretty": "^11.2.1",
+    "prom-client": "^15.1.2",
+    "type-fest": "^4.20.0"
+  },
+  "devDependencies": {
+    "@types/cron": "^2.4.0",
+    "@types/debug": "^4.1.12",
+    "@types/ioredis": "^5.0.0",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.2",
+    "prisma": "^5.15.0",
+    "rimraf": "^5.0.7",
+    "ts-node": "^10.9.2",
+    "tsc-watch": "^6.2.0",
+    "typescript": "^5.4.5"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "lint-staged": {
+    "*.ts": "npm run lint"
+  },
+  "_moduleAliases": {
+    "~": "dist"
+  }
+}

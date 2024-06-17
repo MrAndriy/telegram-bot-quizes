@@ -1,0 +1,115 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  OWNER
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  telegramId   BigInt   @unique @map("telegram_id")
+  languageCode String?  @map("language_code")
+  role         Role     @default(USER)
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  messages  Message[]
+  blacklist Blacklist?
+  quizzes   Quiz[]
+
+  @@map(name: "users")
+}
+
+model Message {
+  id       Int  @id @default(autoincrement())
+  authorId Int  @map("author_id")
+  author   User @relation(fields: [authorId], references: [id])
+
+  @@map(name: "messages")
+}
+
+model Filter {
+  id   Int    @id @default(autoincrement())
+  text String @unique
+
+  @@map(name: "filters")
+}
+
+model Blacklist {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique @map("user_id")
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map(name: "blacklist")
+}
+
+model Section {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  questions Question[]
+  quiz      Quiz[]
+
+  @@map(name: "sections")
+}
+
+model Question {
+  id        Int      @id @default(autoincrement())
+  question  String
+  options   Option[]
+  sectionId Int
+  section   Section  @relation(fields: [sectionId], references: [id])
+
+  answers Answer[]
+
+  @@map(name: "questions")
+}
+
+model Option {
+  id         Int      @id @default(autoincrement())
+  text       String
+  isCorrect  Boolean
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+
+  answers Answer[]
+
+  @@map(name: "options")
+}
+
+model Quiz {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  sectionId Int
+  section   Section  @relation(fields: [sectionId], references: [id])
+  score     Int?
+  active    Boolean  @default(true)
+  answers   Answer[]
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map(name: "quizzes")
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  quizId     Int
+  quiz       Quiz     @relation(fields: [quizId], references: [id])
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+  optionId   Int?
+  option     Option?  @relation(fields: [optionId], references: [id])
+  answeredAt DateTime @default(now())
+
+  @@map(name: "answers")
+}
