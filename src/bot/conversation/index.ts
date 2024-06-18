@@ -48,22 +48,31 @@ export async function quiz(conversation: Conversation, ctx: Context) {
         return answersService.findMany({
           where: {
             quizId: activeQuiz?.id as number,
-          },
-          include: {
-            question: true,
-            option: true,
+            option: {
+              isCorrect: true,
+            },
           },
         });
       });
 
-      const correctAnswers = quizAnswers.filter((answer) => {
-        return answer.option?.isCorrect;
+      const correctAnswers = quizAnswers.length;
+
+      // update the quiz with the correct answers
+      await conversation.external(async () => {
+        await quizService.update({
+          where: {
+            id: activeQuiz?.id as number,
+          },
+          data: {
+            score: correctAnswers,
+          },
+        });
       });
 
       const backKeyboard = new InlineKeyboard();
       backKeyboard.text(ctx.t("back"), "main");
       await ctx.editMessageText(
-        `${ctx.t("quiz.finished")} ${correctAnswers.length} / ${quizAnswers.length}`,
+        `${ctx.t("quiz.finished")} ${correctAnswers} / ${activeQuiz?.total}`,
         {
           reply_markup: backKeyboard,
         },
