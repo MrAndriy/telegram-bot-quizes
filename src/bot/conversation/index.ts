@@ -44,11 +44,30 @@ export async function quiz(conversation: Conversation, ctx: Context) {
 
     // Select a random question
     if (questions.length === 0) {
+      const quizAnswers = await conversation.external(async () => {
+        return answersService.findMany({
+          where: {
+            quizId: activeQuiz?.id as number,
+          },
+          include: {
+            question: true,
+            option: true,
+          },
+        });
+      });
+
+      const correctAnswers = quizAnswers.filter((answer) => {
+        return answer.option?.isCorrect;
+      });
+
       const backKeyboard = new InlineKeyboard();
       backKeyboard.text(ctx.t("back"), "main");
-      await ctx.editMessageText(ctx.t("quiz.finished"), {
-        reply_markup: backKeyboard,
-      });
+      await ctx.editMessageText(
+        `${ctx.t("quiz.finished")} ${correctAnswers.length} / ${quizAnswers.length}`,
+        {
+          reply_markup: backKeyboard,
+        },
+      );
 
       await conversation.external(async () => {
         // mark quiz as finished
