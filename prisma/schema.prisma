@@ -104,7 +104,7 @@ model Quiz {
 model Answer {
   id         Int      @id @default(autoincrement())
   quizId     Int
-  quiz       Quiz     @relation(fields: [quizId], references: [id])
+  quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
   optionId   Int?

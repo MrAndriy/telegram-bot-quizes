@@ -1,6 +1,8 @@
 import { InlineKeyboard } from "grammy";
-import { questionService, quizService } from "~/services";
+import { answersService, questionService, quizService } from "~/services";
 import { Context, Conversation } from "~/bot/types";
+import { getSafeString } from "~/bot/lib";
+import _ from "lodash";
 
 /** Defines the conversation */
 export async function quiz(conversation: Conversation, ctx: Context) {
@@ -42,7 +44,21 @@ export async function quiz(conversation: Conversation, ctx: Context) {
 
     // Select a random question
     if (questions.length === 0) {
-      await ctx.reply("No more questions available in this quiz.");
+      const backKeyboard = new InlineKeyboard();
+      backKeyboard.text(ctx.t("back"), "main");
+      await ctx.editMessageText(ctx.t("quiz.finished"), {
+        reply_markup: backKeyboard,
+      });
+
+      await conversation.external(async () => {
+        // mark quiz as finished
+        await quizService.update({
+          where: {
+            id: activeQuiz?.id as number,
+          },
+          data: { active: false },
+        });
+      });
       // eslint-disable-next-line no-useless-return
       return;
     }
@@ -50,17 +66,19 @@ export async function quiz(conversation: Conversation, ctx: Context) {
     const randomQuestion =
       questions[Math.floor((await conversation.random()) * questions.length)];
 
-    conversation.log("randomQuestion", randomQuestion);
+    const shuffledOptions = await conversation.external(() =>
+      _.shuffle(randomQuestion.options),
+    );
 
     // Create inline keyboard with options
     const keyboard = new InlineKeyboard();
-    randomQuestion.options.forEach((option) => {
+    shuffledOptions.forEach((option) => {
       keyboard.text(option.text, option.id.toString()).row();
     });
 
     // Create inline keyboard with correct answers
     const correctKeyboard = new InlineKeyboard();
-    randomQuestion.options.forEach((option) => {
+    shuffledOptions.forEach((option) => {
       correctKeyboard
         .text(
           option.isCorrect ? `❇️ ${option.text}` : `⛔️ ${option.text}`,
@@ -70,14 +88,9 @@ export async function quiz(conversation: Conversation, ctx: Context) {
     });
 
     // await ctx.editMessageText(getSafeString(randomQuestion.question), {
-    await ctx.editMessageText(randomQuestion.question, {
+    await ctx.editMessageText(getSafeString(randomQuestion.question), {
       reply_markup: keyboard,
     });
-
-    conversation.log(
-      "array of option IDs",
-      randomQuestion.options.map((option) => option.id.toString()),
-    );
 
     const response = await conversation.waitForCallbackQuery(
       randomQuestion.options.map((option) => `${option.id}`),
@@ -85,29 +98,27 @@ export async function quiz(conversation: Conversation, ctx: Context) {
       //   // eslint-disable-next-line no-shadow
       //   otherwise: (ctx) => {
       //     conversation.log("otherwise", ctx.update.callback_query?.data);
-      //     ctx.reply("Use the buttons!");
+      //     ctx.reply("Use the buttons!", {
+      //       reply_markup: keyboard,
+      //     });
       //   },
       // },
     );
 
-    conversation.log("response", response);
-
-    // Handle response (here you can process the user's choice)
-    const selectedOptionId = response.match;
-    const selectedOption = randomQuestion.options.find(
-      (option) => option.id === +selectedOptionId,
-    );
-
-    // await ctx.editMessageText(getSafeString(randomQuestion.question), {
-    await ctx.editMessageText(randomQuestion.question, {
-      reply_markup: correctKeyboard,
+    // save answer in db
+    conversation.external(async () => {
+      return answersService.create({
+        data: {
+          quizId: activeQuiz?.id as number,
+          questionId: randomQuestion.id,
+          optionId: +response.match!,
+        },
+      });
     });
 
-    if (selectedOption) {
-      // Save the answer
-      conversation.log("save answer", selectedOption);
-      // conversation.external(async () => {})
-    }
+    await ctx.editMessageText(getSafeString(randomQuestion.question), {
+      reply_markup: correctKeyboard,
+    });
 
     // Continue asking questions
     await askQuestion();

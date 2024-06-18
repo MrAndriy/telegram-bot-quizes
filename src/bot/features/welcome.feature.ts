@@ -14,3 +14,13 @@ feature.command("start", logHandle("handle /start"), async (ctx) => {
     reply_markup: mainKeyboard,
   });
 });
+
+feature.callbackQuery(
+  "main",
+  logHandle("handle callbackQuery main"),
+  async (ctx) => {
+    await ctx.editMessageText(ctx.t("main.welcome"), {
+      reply_markup: mainKeyboard,
+    });
+  },
+);
