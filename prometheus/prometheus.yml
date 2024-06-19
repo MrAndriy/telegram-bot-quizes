@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "telegram_bot"
+    honor_labels: true
+    metrics_path: "5392613465:AAFfY5zXJH7g_w_TH2KziA05BUW8GIle0Uw/metrics"
+    static_configs:
+      - targets: ["localhost:3030"]
