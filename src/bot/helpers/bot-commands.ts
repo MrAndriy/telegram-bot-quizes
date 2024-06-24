@@ -19,12 +19,12 @@ export const getPrivateChatCommands = (options: {
     },
   ];
 
-  // if (options.includeLanguageCommand) {
-  //   commands.push({
-  //     command: "language",
-  //     description: i18n.t(options.localeCode, "language_command.description"),
-  //   });
-  // }
+  if (options.includeLanguageCommand) {
+    commands.push({
+      command: "language",
+      description: i18n.t(options.localeCode, "language_command.description"),
+    });
+  }
 
   return commands;
 };

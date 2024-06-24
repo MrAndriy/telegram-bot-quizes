@@ -18,7 +18,7 @@ import {
 import { apiCallsLogger } from "~/bot/transformers";
 import { botAdminFeature, quizFeature, welcomeFeature } from "~/bot/features";
 import { conversations, createConversation } from "@grammyjs/conversations";
-import { quiz } from "./conversation";
+import { quizConversation } from "./conversation";
 
 export const bot = new Bot<Context>(config.BOT_TOKEN);
 
@@ -44,7 +44,7 @@ bot.use(setUser());
 bot.use(conversations());
 
 // Conversations
-bot.use(createConversation(quiz, "quiz"));
+bot.use(createConversation(quizConversation, "quiz"));
 
 // Handlers
 bot.use(botAdminFeature);
