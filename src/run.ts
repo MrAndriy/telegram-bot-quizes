@@ -2,7 +2,6 @@ import "module-alias/register";
 
 import { bot } from "~/bot";
 import { server } from "~/server";
-import { prisma } from "~/prisma";
 import { config } from "~/config";
 import { logger } from "~/logger";
 
