@@ -10,6 +10,9 @@ const storage = new RedisAdapter({
 /** Middleware for setting up session */
 export const middleware = (): Middleware<Context> =>
   session({
-    initial: () => ({}),
+    initial: () => ({
+      currentId: 0,
+      removeMessages: [],
+    }),
     storage,
   });

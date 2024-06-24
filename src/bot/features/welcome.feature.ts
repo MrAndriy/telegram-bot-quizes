@@ -10,9 +10,18 @@ const feature = composer.chatType("private");
 feature.use(mainKeyboard);
 
 feature.command("start", logHandle("handle /start"), async (ctx) => {
-  await ctx.reply(ctx.t("main.welcome"), {
+  const { message_id: id } = await ctx.reply(ctx.t("main.welcome"), {
     reply_markup: mainKeyboard,
   });
+
+  ctx.session = {
+    ...ctx.session,
+    currentId: id,
+    removeMessages: [
+      ...(ctx.session.removeMessages ?? []),
+      ctx.session.currentId,
+    ],
+  };
 });
 
 feature.callbackQuery(
