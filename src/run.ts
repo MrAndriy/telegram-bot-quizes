@@ -16,12 +16,21 @@ const run = async () => {
       (serverError) => {
         if (serverError) {
           logger.error(serverError);
-        } else {
+        } else if (config.ENABLE_WEBHOOK === "true") {
           bot.api
             .setWebhook(config.BOT_WEBHOOK, {
               allowed_updates: config.BOT_ALLOWED_UPDATES,
             })
             .catch((err) => logger.error(err));
+        } else {
+          bot.start({
+            allowed_updates: config.BOT_ALLOWED_UPDATES,
+            onStart: ({ username }) =>
+              logger.info({
+                msg: "bot running...",
+                username,
+              }),
+          });
         }
       },
     );

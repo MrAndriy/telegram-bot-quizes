@@ -24,3 +24,8 @@ feature.callbackQuery(
     });
   },
 );
+
+feature.command("cancel", async (ctx) => {
+  await ctx.conversation.exit();
+  await ctx.reply("Leaving.");
+});

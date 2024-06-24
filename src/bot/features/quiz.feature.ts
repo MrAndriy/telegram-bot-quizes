@@ -13,8 +13,3 @@ feature.command("quiz", async (ctx) => {
     reply_markup: quizKeyboard,
   });
 });
-
-feature.command("cancel", async (ctx) => {
-  await ctx.conversation.exit();
-  await ctx.reply("Leaving.");
-});

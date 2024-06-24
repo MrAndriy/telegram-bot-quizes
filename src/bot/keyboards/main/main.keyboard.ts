@@ -8,16 +8,18 @@ import { selectLanguageKeyboard } from "~/bot/keyboards/language";
 
 export const keyboard = new Menu<Context>("main");
 
-keyboard.submenu(
-  {
-    text: (ctx) => ctx.t("main.quiz"),
-  },
-  "quiz",
-  logHandle("handle quiz"),
-  async (ctx) => {
-    await ctx.editMessageText(ctx.t("quiz.description"));
-  },
-);
+keyboard
+  .submenu(
+    {
+      text: (ctx) => ctx.t("main.quiz"),
+    },
+    "quiz",
+    logHandle("handle quiz"),
+    async (ctx) => {
+      await ctx.editMessageText(ctx.t("quiz.description"));
+    },
+  )
+  .row();
 
 keyboard
   .submenu(
@@ -33,10 +35,22 @@ keyboard
         return;
       }
 
+      const totalScore = user.quizzes?.reduce(
+        (sum, quiz) => sum + quiz.score,
+        0,
+      );
+      const totalQuizzes = user.quizzes?.length;
+      const totalPossibleScore = user.quizzes?.reduce(
+        (sum, quiz) => sum + quiz.total,
+        0,
+      );
+
       await ctx.editMessageText(`
 ${ctx.t("statistics.description")}:
 ${ctx.t("statistics.id")}: <code>${user.telegramId}</code>
-${ctx.t("statistics.messages")}: ${user.messages?.length}`);
+${ctx.t("statistics.totalQuizzes")}: ${totalQuizzes}
+${ctx.t("statistics.totalScore")}: ${totalScore}
+${ctx.t("statistics.totalPossibleScore")}: ${totalPossibleScore}`);
     },
   )
   .row();
